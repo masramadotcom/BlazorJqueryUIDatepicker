@@ -1,0 +1,72 @@
+﻿@page "/"
+@inject IJSRuntime JsRuntime;
+    <div class="row">
+        <div class="col">
+            <h1>Hello, Zor!</h1>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col">
+            <h4>Select Date</h4>
+            <div class="margin-t-10">
+                <input type="text" @bind-value="@myValue" id="datepicker" autocomplete="off" placeholder="Select Date" @onkeyup="@(()=> ValidationDate())" />
+                <h6 class="text-danger mt-2">@InvalidMessage</h6>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col">
+            <p>The date you choose is : @myValue</p>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col">
+            <h6>Created by Dedek Yusuf (Mas Rama) and Efrizal BJ</h6>
+        </div>
+    </div>
+
+@code{
+    string myValue;
+
+    string InvalidMessage;
+
+    protected override void OnInitialized()
+    {
+        myValue = DateTime.Now.ToString("dd/MM/yyyy");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await JsRuntime.InvokeVoidAsync("JsInteropDatepicker");
+    }
+
+
+    public void ValidationDate()
+    {
+        string oldValue = myValue;
+
+        InvalidMessage = "";
+
+        DateTime time;
+
+        if (!DateTime.TryParseExact(myValue, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out time))
+        {
+            InvalidMessage = oldValue + " Format Date is not valid";
+            myValue = DateTime.Now.ToString("dd/MM/yyyy");
+        }
+        else
+        {
+            var date = DateTime.ParseExact(myValue, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture);
+            if (date.Date < DateTime.Now.Date)
+            {
+                myValue = DateTime.Now.ToString("dd/MM/yyyy");
+                InvalidMessage = "Minimum date is " + oldValue;
+            }
+        }
+
+    }
+
+}
